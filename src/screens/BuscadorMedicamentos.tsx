@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Alert } from 'react-native';
-import { SearchBar, Card, Text, Button } from '@rneui/themed';
-import { Medicamento, FiltrosMedicamentos } from '../types/types';
+import { SearchBar, Card, Text, Button, ButtonGroup } from '@rneui/themed';
+import { Medicamento, FiltrosMedicamentos, TipoOrdenamiento, OpcionOrdenamiento } from '../types/types';
 
 // Importar el JSON directamente
 import medicamentosData from '../../assets/medicamentos.json';
@@ -10,9 +10,19 @@ type NavigationProps = {
   navigation: any;
 };
 
+const opcionesOrdenamiento: OpcionOrdenamiento[] = [
+  { value: 'nombre-asc', label: 'Nombre ↑' },
+  { value: 'nombre-desc', label: 'Nombre ↓' },
+  { value: 'precio-asc', label: 'Precio ↑' },
+  { value: 'precio-desc', label: 'Precio ↓' },
+  { value: 'laboratorio-asc', label: 'Laboratorio ↑' },
+  { value: 'laboratorio-desc', label: 'Laboratorio ↓' },
+];
+
 const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [medicamentosFiltrados, setMedicamentosFiltrados] = useState<Medicamento[]>([]);
+  const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('nombre-asc');
   const [filtros, setFiltros] = useState<FiltrosMedicamentos>({
     busqueda: '',
     laboratorio: undefined,
@@ -28,10 +38,31 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
     try {
       const data = require('../../assets/medicamentos.json');
       setMedicamentos(data);
-      setMedicamentosFiltrados(data);
+      setMedicamentosFiltrados(ordenarMedicamentos(data, ordenamiento));
     } catch (error) {
       console.error('Error al cargar los datos:', error);
       Alert.alert('Error', 'No se pudieron cargar los datos de medicamentos');
+    }
+  };
+
+  const ordenarMedicamentos = (lista: Medicamento[], tipoOrdenamiento: TipoOrdenamiento): Medicamento[] => {
+    const listaOrdenada = [...lista];
+    
+    switch (tipoOrdenamiento) {
+      case 'nombre-asc':
+        return listaOrdenada.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      case 'nombre-desc':
+        return listaOrdenada.sort((a, b) => b.nombre.localeCompare(a.nombre));
+      case 'precio-asc':
+        return listaOrdenada.sort((a, b) => a.precio - b.precio);
+      case 'precio-desc':
+        return listaOrdenada.sort((a, b) => b.precio - a.precio);
+      case 'laboratorio-asc':
+        return listaOrdenada.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
+      case 'laboratorio-desc':
+        return listaOrdenada.sort((a, b) => b.laboratorio.localeCompare(a.laboratorio));
+      default:
+        return listaOrdenada;
     }
   };
 
@@ -46,12 +77,16 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
       return cumpleBusqueda && cumpleLaboratorio && cumplePrecioMin && cumplePrecioMax;
     });
 
-    setMedicamentosFiltrados(resultados);
+    setMedicamentosFiltrados(ordenarMedicamentos(resultados, ordenamiento));
   };
 
   useEffect(() => {
     aplicarFiltros();
-  }, [filtros, medicamentos]);
+  }, [filtros, medicamentos, ordenamiento]);
+
+  const cambiarOrdenamiento = (index: number) => {
+    setOrdenamiento(opcionesOrdenamiento[index].value);
+  };
 
   const renderMedicamento = ({ item }: { item: Medicamento }) => (
     <Card containerStyle={styles.card}>
@@ -96,6 +131,18 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
         platform="default"
         containerStyle={styles.searchBar}
       />
+      <ButtonGroup
+        buttons={opcionesOrdenamiento.map(opcion => opcion.label)}
+        selectedIndex={opcionesOrdenamiento.findIndex(opcion => opcion.value === ordenamiento)}
+        onPress={cambiarOrdenamiento}
+        containerStyle={styles.buttonGroup}
+        textStyle={styles.buttonGroupText}
+        buttonContainerStyle={styles.buttonContainer}
+        innerBorderStyle={{ width: 0.5 }}
+      />
+      <Text style={styles.resultados}>
+        Resultados encontrados: {medicamentosFiltrados.length}
+      </Text>
       <FlatList
         data={medicamentosFiltrados}
         renderItem={renderMedicamento}
@@ -115,6 +162,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
+  },
+  buttonGroup: {
+    marginHorizontal: 10,
+    marginBottom: 10,
+    height: 40,
+    borderRadius: 8,
+  },
+  buttonGroupText: {
+    fontSize: 12,
+  },
+  buttonContainer: {
+    borderRadius: 8,
+  },
+  resultados: {
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#666',
   },
   lista: {
     flex: 1,
