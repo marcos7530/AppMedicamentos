@@ -55,29 +55,29 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
 
   const renderMedicamento = ({ item }: { item: Medicamento }) => (
     <Card containerStyle={styles.card}>
-      <Card.Title>{item.nombre}</Card.Title>
+      <Card.Title>{item.nombre || 'Sin nombre'}</Card.Title>
       <Card.Divider />
       <View>
         <Text style={styles.label}>Principio Activo:</Text>
-        <Text style={styles.value}>{item.principioActivo}</Text>
+        <Text style={styles.value}>{item.principioActivo || 'No especificado'}</Text>
         
         <Text style={styles.label}>Presentación:</Text>
-        <Text style={styles.value}>{item.presentacion}</Text>
+        <Text style={styles.value}>{item.presentacion || 'No especificada'}</Text>
         
         <Text style={styles.label}>Laboratorio:</Text>
-        <Text style={styles.value}>{item.laboratorio}</Text>
+        <Text style={styles.value}>{item.laboratorio || 'No especificado'}</Text>
         
         <Text style={styles.label}>Precio:</Text>
-        <Text style={styles.value}>${item.precio.toFixed(2)}</Text>
+        <Text style={styles.value}>${typeof item.precio === 'number' ? item.precio.toFixed(2) : '0.00'}</Text>
         
         <Text style={styles.label}>Cobertura:</Text>
-        <Text style={styles.value}>{item.cobertura}</Text>
+        <Text style={styles.value}>{item.cobertura || 'No especificada'}</Text>
         
         <Text style={styles.label}>Importe Afiliado:</Text>
-        <Text style={styles.value}>${item.importeAfiliado.toFixed(2)}</Text>
+        <Text style={styles.value}>${typeof item.importeAfiliado === 'number' ? item.importeAfiliado.toFixed(2) : '0.00'}</Text>
         
         <Text style={styles.label}>Alfabeta:</Text>
-        <Text style={styles.value}>{item.alfabeta}</Text>
+        <Text style={styles.value}>{item.alfabeta || 'No especificado'}</Text>
       </View>
       <Button
         title="Ver Detalle"
@@ -99,7 +99,7 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
       <FlatList
         data={medicamentosFiltrados}
         renderItem={renderMedicamento}
-        keyExtractor={(item) => item.nombre}
+        keyExtractor={(item, index) => `${item.alfabeta}-${item.nombre}-${index}`}
         style={styles.lista}
       />
     </View>
