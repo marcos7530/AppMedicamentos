@@ -11,12 +11,13 @@ export interface Medicamento {
 
 export interface FiltrosMedicamentos {
   busqueda: string;
+  modoBusqueda: 'nombre' | 'principio';
   laboratorio?: string;
   precioMin?: number;
   precioMax?: number;
 }
 
-export type TipoOrdenamiento = 'nombre-asc' | 'nombre-desc' | 'precio-asc' | 'precio-desc' | 'laboratorio-asc' | 'laboratorio-desc';
+export type TipoOrdenamiento = 'nombre-asc' | 'nombre-desc' | 'principio-asc' | 'principio-desc' | 'precio-asc' | 'precio-desc';
 
 export interface OpcionOrdenamiento {
   value: TipoOrdenamiento;

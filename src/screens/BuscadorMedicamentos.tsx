@@ -13,10 +13,10 @@ type NavigationProps = {
 const opcionesOrdenamiento: OpcionOrdenamiento[] = [
   { value: 'nombre-asc', label: 'Nombre ↑' },
   { value: 'nombre-desc', label: 'Nombre ↓' },
+  { value: 'principio-asc', label: 'Principio ↑' },
+  { value: 'principio-desc', label: 'Principio ↓' },
   { value: 'precio-asc', label: 'Precio ↑' },
   { value: 'precio-desc', label: 'Precio ↓' },
-  { value: 'laboratorio-asc', label: 'Laboratorio ↑' },
-  { value: 'laboratorio-desc', label: 'Laboratorio ↓' },
 ];
 
 const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
@@ -25,6 +25,7 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('nombre-asc');
   const [filtros, setFiltros] = useState<FiltrosMedicamentos>({
     busqueda: '',
+    modoBusqueda: 'nombre',
     laboratorio: undefined,
     precioMin: undefined,
     precioMax: undefined
@@ -53,14 +54,14 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
         return listaOrdenada.sort((a, b) => a.nombre.localeCompare(b.nombre));
       case 'nombre-desc':
         return listaOrdenada.sort((a, b) => b.nombre.localeCompare(a.nombre));
+      case 'principio-asc':
+        return listaOrdenada.sort((a, b) => a.principioActivo.localeCompare(b.principioActivo));
+      case 'principio-desc':
+        return listaOrdenada.sort((a, b) => b.principioActivo.localeCompare(a.principioActivo));
       case 'precio-asc':
         return listaOrdenada.sort((a, b) => a.precio - b.precio);
       case 'precio-desc':
         return listaOrdenada.sort((a, b) => b.precio - a.precio);
-      case 'laboratorio-asc':
-        return listaOrdenada.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
-      case 'laboratorio-desc':
-        return listaOrdenada.sort((a, b) => b.laboratorio.localeCompare(a.laboratorio));
       default:
         return listaOrdenada;
     }
@@ -68,8 +69,11 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
 
   const aplicarFiltros = () => {
     const resultados = medicamentos.filter(med => {
-      const cumpleBusqueda = med.nombre.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
-                            med.principioActivo.toLowerCase().includes(filtros.busqueda.toLowerCase());
+      const textoBusqueda = filtros.busqueda.toLowerCase();
+      const cumpleBusqueda = filtros.modoBusqueda === 'nombre' 
+        ? med.nombre.toLowerCase().includes(textoBusqueda)
+        : med.principioActivo.toLowerCase().includes(textoBusqueda);
+      
       const cumpleLaboratorio = !filtros.laboratorio || med.laboratorio === filtros.laboratorio;
       const cumplePrecioMin = !filtros.precioMin || med.precio >= filtros.precioMin;
       const cumplePrecioMax = !filtros.precioMax || med.precio <= filtros.precioMax;
@@ -96,23 +100,8 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
         <Text style={styles.label}>Principio Activo:</Text>
         <Text style={styles.value}>{item.principioActivo || 'No especificado'}</Text>
         
-        <Text style={styles.label}>Presentación:</Text>
-        <Text style={styles.value}>{item.presentacion || 'No especificada'}</Text>
-        
-        <Text style={styles.label}>Laboratorio:</Text>
-        <Text style={styles.value}>{item.laboratorio || 'No especificado'}</Text>
-        
         <Text style={styles.label}>Precio:</Text>
         <Text style={styles.value}>${typeof item.precio === 'number' ? item.precio.toFixed(2) : '0.00'}</Text>
-        
-        <Text style={styles.label}>Cobertura:</Text>
-        <Text style={styles.value}>{item.cobertura || 'No especificada'}</Text>
-        
-        <Text style={styles.label}>Importe Afiliado:</Text>
-        <Text style={styles.value}>${typeof item.importeAfiliado === 'number' ? item.importeAfiliado.toFixed(2) : '0.00'}</Text>
-        
-        <Text style={styles.label}>Alfabeta:</Text>
-        <Text style={styles.value}>{item.alfabeta || 'No especificado'}</Text>
       </View>
       <Button
         title="Ver Detalle"
@@ -124,13 +113,22 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
 
   return (
     <View style={styles.container}>
-      <SearchBar
-        placeholder="Buscar medicamentos..."
-        onChangeText={(texto: string) => setFiltros({ ...filtros, busqueda: texto })}
-        value={filtros.busqueda}
-        platform="default"
-        containerStyle={styles.searchBar}
-      />
+      <View style={styles.searchContainer}>
+        <SearchBar
+          placeholder={`Buscar por ${filtros.modoBusqueda === 'nombre' ? 'nombre' : 'principio activo'}...`}
+          onChangeText={(texto: string) => setFiltros({ ...filtros, busqueda: texto })}
+          value={filtros.busqueda}
+          platform="default"
+          containerStyle={styles.searchBar}
+        />
+        <ButtonGroup
+          buttons={['Nombre', 'Principio']}
+          selectedIndex={filtros.modoBusqueda === 'nombre' ? 0 : 1}
+          onPress={(index) => setFiltros({ ...filtros, modoBusqueda: index === 0 ? 'nombre' : 'principio' })}
+          containerStyle={styles.searchModeGroup}
+          textStyle={styles.searchModeText}
+        />
+      </View>
       <ButtonGroup
         buttons={opcionesOrdenamiento.map(opcion => opcion.label)}
         selectedIndex={opcionesOrdenamiento.findIndex(opcion => opcion.value === ordenamiento)}
@@ -158,10 +156,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
   searchBar: {
+    flex: 1,
     backgroundColor: 'transparent',
     borderBottomColor: 'transparent',
     borderTopColor: 'transparent',
+  },
+  searchModeGroup: {
+    width: 150,
+    height: 40,
+    borderRadius: 8,
+  },
+  searchModeText: {
+    fontSize: 12,
   },
   buttonGroup: {
     marginHorizontal: 10,
