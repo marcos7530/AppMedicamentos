@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Alert } from 'react-native';
-import { SearchBar, Card, Text, Button, ButtonGroup } from '@rneui/themed';
+import { SearchBar, Card, Text, Button, ButtonGroup, Icon } from '@rneui/themed';
 import { Medicamento, FiltrosMedicamentos, TipoOrdenamiento, OpcionOrdenamiento } from '../types/types';
+import { useCarrito } from '../context/CarritoContext';
 
 // Importar el JSON directamente
 import medicamentosData from '../../assets/medicamentos.json';
@@ -20,6 +21,7 @@ const opcionesOrdenamiento: OpcionOrdenamiento[] = [
 ];
 
 const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
+  const { agregarAlCarrito } = useCarrito();
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [medicamentosFiltrados, setMedicamentosFiltrados] = useState<Medicamento[]>([]);
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('nombre-asc');
@@ -103,11 +105,30 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
         <Text style={styles.label}>Precio:</Text>
         <Text style={styles.value}>${typeof item.precio === 'number' ? item.precio.toFixed(2) : '0.00'}</Text>
       </View>
-      <Button
-        title="Ver Detalle"
-        onPress={() => navigation.navigate('Detalle', { medicamento: item })}
-        style={styles.botonDetalle}
-      />
+      <View style={styles.botonesContainer}>
+        <Button
+          title="Ver Detalle"
+          onPress={() => navigation.navigate('Detalle', { medicamento: item })}
+          containerStyle={styles.botonContainer}
+          buttonStyle={styles.botonDetalle}
+        />
+        <Button
+          title="Agregar al Carrito"
+          onPress={() => {
+            agregarAlCarrito(item);
+            Alert.alert('Éxito', 'Medicamento agregado al carrito');
+          }}
+          containerStyle={styles.botonContainer}
+          buttonStyle={styles.botonCarrito}
+          icon={{
+            name: 'shopping-cart',
+            type: 'font-awesome',
+            size: 15,
+            color: 'white',
+          }}
+          iconRight
+        />
+      </View>
     </Card>
   );
 
@@ -195,8 +216,22 @@ const styles = StyleSheet.create({
   lista: {
     flex: 1,
   },
-  botonDetalle: {
+  botonesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 10,
+  },
+  botonContainer: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  botonDetalle: {
+    backgroundColor: '#2089dc',
+    borderRadius: 8,
+  },
+  botonCarrito: {
+    backgroundColor: '#28a745',
+    borderRadius: 8,
   },
   card: {
     margin: 10,

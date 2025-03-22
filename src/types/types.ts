@@ -9,6 +9,20 @@ export interface Medicamento {
   alfabeta: string;
 }
 
+export interface ItemCarrito {
+  medicamento: Medicamento;
+  cantidad: number;
+}
+
+export interface CarritoContextType {
+  items: ItemCarrito[];
+  agregarAlCarrito: (medicamento: Medicamento) => void;
+  removerDelCarrito: (alfabeta: string) => void;
+  actualizarCantidad: (alfabeta: string, cantidad: number) => void;
+  limpiarCarrito: () => void;
+  total: number;
+}
+
 export interface FiltrosMedicamentos {
   busqueda: string;
   modoBusqueda: 'nombre' | 'principio';
