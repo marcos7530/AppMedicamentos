@@ -15,8 +15,14 @@ const Carrito = () => {
     const itemsHTML = items.map(item => `
       <div style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #eee;">
         <div style="font-weight: bold;">${item.medicamento.nombre}</div>
-        <div style="color: #666;">${item.medicamento.principioActivo}</div>
-        <div>
+        <div style="color: #666;">
+          <span style="font-style: italic;">Presentación: ${item.medicamento.presentacion}</span>
+          <span style="margin-right: 20px;">- Principio Activo: ${item.medicamento.principioActivo}</span>
+        </div>
+        <div style="color: #666; margin-top: 5px;">
+          <span style="color: #2089dc;">Cobertura: ${item.medicamento.cobertura || 'Sin cobertura'}</span>
+        </div>
+        <div style="margin-top: 5px;">
           Cantidad: ${item.cantidad} x $${item.medicamento.precio.toFixed(2)} = 
           $${(item.medicamento.precio * item.cantidad).toFixed(2)}
         </div>
@@ -31,8 +37,18 @@ const Carrito = () => {
             Fecha: ${fecha}
           </div>
           ${itemsHTML}
-          <div style="margin-top: 20px; text-align: right; font-size: 18px; font-weight: bold;">
-            Total: $${total.toFixed(2)}
+          <div style="margin-top: 20px; text-align: right;">
+            <div style="font-size: 16px; color: #2089dc; margin-bottom: 10px;">
+              Resumen de Coberturas:
+              ${items.map(item => `
+                <div style="margin-left: 20px; color: #666;">
+                  ${item.medicamento.nombre} (${item.medicamento.presentacion}): ${item.medicamento.cobertura || 'Sin cobertura'}
+                </div>
+              `).join('')}
+            </div>
+            <div style="font-size: 18px; font-weight: bold;">
+              Total: $${total.toFixed(2)}
+            </div>
           </div>
         </body>
       </html>
@@ -55,36 +71,68 @@ const Carrito = () => {
 
   const renderItem = ({ item }: { item: ItemCarrito }) => (
     <Card containerStyle={styles.card}>
-      <View style={styles.itemContainer}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.nombre}>{item.medicamento.nombre}</Text>
-          <Text style={styles.principioActivo}>{item.medicamento.principioActivo}</Text>
-          <Text style={styles.precio}>${item.medicamento.precio.toFixed(2)} c/u</Text>
-        </View>
-        
-        <View style={styles.cantidadContainer}>
-          <Button
-            icon={<Icon name="remove" size={20} color="white" />}
-            onPress={() => actualizarCantidad(item.medicamento.alfabeta, item.cantidad - 1)}
-            buttonStyle={styles.botonCantidad}
-          />
-          <Text style={styles.cantidad}>{item.cantidad}</Text>
-          <Button
-            icon={<Icon name="add" size={20} color="white" />}
-            onPress={() => actualizarCantidad(item.medicamento.alfabeta, item.cantidad + 1)}
-            buttonStyle={styles.botonCantidad}
-          />
+      <Card.Title style={styles.titulo}>{item.medicamento.nombre}</Card.Title>
+      <Card.Divider />
+      
+      <View style={styles.infoContainer}>
+        <View style={styles.row}>
+          <View style={styles.columnLeft}>
+            <Text style={styles.label}>Principio Activo:</Text>
+            <Text style={styles.value}>{item.medicamento.principioActivo}</Text>
+          </View>
+          <View style={styles.columnRight}>
+            <Text style={styles.label}>Presentación:</Text>
+            <Text style={[styles.value, styles.presentacion]}>{item.medicamento.presentacion}</Text>
+          </View>
         </View>
 
-        <Button
-          icon={<Icon name="delete" size={24} color="white" />}
-          onPress={() => removerDelCarrito(item.medicamento.alfabeta)}
-          buttonStyle={styles.botonEliminar}
-        />
+        <View style={styles.row}>
+          <View style={styles.columnLeft}>
+            <Text style={styles.label}>Cobertura:</Text>
+            <Text style={[styles.value, styles.cobertura]}>
+              {item.medicamento.cobertura || 'Sin cobertura'}
+            </Text>
+          </View>
+          <View style={styles.columnRight}>
+            <Text style={styles.label}>Importe Afiliado:</Text>
+            <Text style={[styles.value, styles.precio]}>
+              ${item.medicamento.precio.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.columnLeft}>
+            <Text style={styles.label}>Cantidad:</Text>
+            <View style={styles.cantidadControles}>
+              <Button
+                title="-"
+                titleStyle={styles.botonCantidadTexto}
+                onPress={() => {
+                  if (item.cantidad === 1) {
+                    removerDelCarrito(item.medicamento.alfabeta);
+                  } else {
+                    actualizarCantidad(item.medicamento.alfabeta, item.cantidad - 1);
+                  }
+                }}
+                buttonStyle={[styles.botonCantidad, styles.botonMenos]}
+              />
+              <Text style={styles.cantidadTexto}>{item.cantidad}</Text>
+              <Button
+                title="+"
+                titleStyle={styles.botonCantidadTexto}
+                onPress={() => actualizarCantidad(item.medicamento.alfabeta, item.cantidad + 1)}
+                buttonStyle={[styles.botonCantidad, styles.botonMas]}
+              />
+            </View>
+          </View>
+          <View style={styles.columnRight}>
+            <Text style={styles.subtotal}>
+              Subtotal: ${(item.cantidad * item.medicamento.precio).toFixed(2)}
+            </Text>
+          </View>
+        </View>
       </View>
-      <Text style={styles.subtotal}>
-        Subtotal: ${(item.medicamento.precio * item.cantidad).toFixed(2)}
-      </Text>
     </Card>
   );
 
@@ -102,7 +150,7 @@ const Carrito = () => {
       <FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={item => item.medicamento.alfabeta}
+        keyExtractor={(item) => item.medicamento.alfabeta}
         contentContainerStyle={styles.listContainer}
       />
       <Card containerStyle={styles.totalCard}>
@@ -111,13 +159,6 @@ const Carrito = () => {
           title="Generar Presupuesto"
           onPress={generarYCompartirPDF}
           buttonStyle={styles.botonConfirmar}
-          icon={{
-            name: 'file-pdf-o',
-            type: 'font-awesome',
-            size: 15,
-            color: 'white',
-          }}
-          iconRight
         />
       </Card>
     </View>
@@ -142,51 +183,73 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  titulo: {
+    fontSize: 18,
+    textAlign: 'left',
   },
   infoContainer: {
+    marginBottom: 0,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  columnLeft: {
     flex: 1,
+    marginRight: 10,
   },
-  nombre: {
-    fontSize: 16,
+  columnRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  label: {
     fontWeight: 'bold',
-  },
-  principioActivo: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 4,
+  },
+  value: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  cobertura: {
+    color: '#2089dc',
+    fontWeight: '500',
   },
   precio: {
-    fontSize: 14,
     color: '#28a745',
+    fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'right',
   },
-  cantidadContainer: {
+  cantidadControles: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 10,
+  },
+  cantidadTexto: {
+    fontSize: 18,
+    marginHorizontal: 15,
   },
   botonCantidad: {
-    padding: 5,
-    margin: 5,
-    backgroundColor: '#2089dc',
-    borderRadius: 8,
+    width: 35,
+    height: 35,
+    padding: 0,
+    borderRadius: 17.5,
   },
-  cantidad: {
-    fontSize: 16,
-    marginHorizontal: 10,
-  },
-  botonEliminar: {
-    padding: 10,
+  botonMenos: {
     backgroundColor: '#dc3545',
-    borderRadius: 8,
+  },
+  botonMas: {
+    backgroundColor: '#28a745',
   },
   subtotal: {
-    textAlign: 'right',
-    marginTop: 10,
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#2089dc',
+    marginTop: 10,
+    textAlign: 'right',
   },
   totalCard: {
     position: 'absolute',
@@ -194,8 +257,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     margin: 0,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     elevation: 4,
@@ -224,6 +285,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
     marginTop: 10,
+  },
+  botonCantidadTexto: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+  presentacion: {
+    color: '#666',
+    fontStyle: 'italic',
   },
 });
 

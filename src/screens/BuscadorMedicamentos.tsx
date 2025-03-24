@@ -102,38 +102,57 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
 
   const renderMedicamento = ({ item }: { item: Medicamento }) => (
     <Card containerStyle={styles.card}>
-      <Card.Title>{item.nombre || 'Sin nombre'}</Card.Title>
-      <Card.Divider />
-      <View>
-        <Text style={styles.label}>Principio Activo:</Text>
-        <Text style={styles.value}>{item.principioActivo || 'No especificado'}</Text>
+      <View style={styles.cardContent}>
+        <View style={styles.headerRow}>
+          <Text style={styles.nombre}>{item.nombre}</Text>
+        </View>
         
-        <Text style={styles.label}>Precio:</Text>
-        <Text style={styles.value}>${typeof item.precio === 'number' ? item.precio.toFixed(2) : '0.00'}</Text>
-      </View>
-      <View style={styles.botonesContainer}>
-        <Button
-          title="Ver Detalle"
-          onPress={() => navigation.navigate('Detalle', { medicamento: item })}
-          containerStyle={styles.botonContainer}
-          buttonStyle={styles.botonDetalle}
-        />
-        <Button
-          title="Agregar al Carrito"
-          onPress={() => {
-            agregarAlCarrito(item);
-            Alert.alert('Éxito', 'Medicamento agregado al carrito');
-          }}
-          containerStyle={styles.botonContainer}
-          buttonStyle={styles.botonCarrito}
-          icon={{
-            name: 'shopping-cart',
-            type: 'font-awesome',
-            size: 15,
-            color: 'white',
-          }}
-          iconRight
-        />
+        <View style={styles.contentRow}>
+          <View style={styles.infoColumn}>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Presentación:</Text>
+              <Text style={styles.value}>{item.presentacion}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Principio Activo:</Text>
+              <Text style={styles.value}>{item.principioActivo}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Cobertura:</Text>
+              <Text style={[styles.value, styles.cobertura]}>{item.cobertura || 'Sin cobertura'}</Text>
+            </View>
+          </View>
+
+          <View style={styles.precioColumn}>
+            <Text style={styles.label}>Importe Afiliado:</Text>
+            <Text style={styles.importeAfiliado}>
+              ${typeof item.importeAfiliado === 'number' ? item.importeAfiliado.toFixed(2) : '0.00'}
+            </Text>
+            <Button
+              title="Agregar al Carrito"
+              onPress={() => {
+                const medicamentoConImporteAfiliado = {
+                  ...item,
+                  precio: item.importeAfiliado || 0
+                };
+                agregarAlCarrito(medicamentoConImporteAfiliado);
+                Alert.alert(
+                  'Medicamento Agregado',
+                  `${item.nombre}\nPresentación: ${item.presentacion}\nCobertura: ${item.cobertura || 'Sin cobertura'}\nImporte Afiliado: $${(item.importeAfiliado || 0).toFixed(2)}`,
+                  [{ text: 'OK' }]
+                );
+              }}
+              buttonStyle={styles.botonAgregar}
+              icon={{
+                name: 'shopping-cart',
+                type: 'font-awesome',
+                size: 15,
+                color: 'white',
+              }}
+              iconRight
+            />
+          </View>
+        </View>
       </View>
     </Card>
   );
@@ -267,25 +286,9 @@ const styles = StyleSheet.create({
   lista: {
     flex: 1,
   },
-  botonesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  botonContainer: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  botonDetalle: {
-    backgroundColor: '#2089dc',
-    borderRadius: 8,
-  },
-  botonCarrito: {
-    backgroundColor: '#28a745',
-    borderRadius: 8,
-  },
   card: {
-    marginBottom: 10,
+    margin: 10,
+    padding: 10,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -294,13 +297,54 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   cardContent: {
-    padding: 15,
+    flex: 1,
   },
-  label: {
+  headerRow: {
+    marginBottom: 10,
+  },
+  nombre: {
+    fontSize: 16,
     fontWeight: 'bold',
   },
+  contentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  infoColumn: {
+    flex: 2.5,
+    marginRight: 10,
+  },
+  infoRow: {
+    marginBottom: 6,
+  },
+  precioColumn: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 1,
+  },
   value: {
+    fontSize: 14,
+  },
+  cobertura: {
+    color: '#2089dc',
+    fontWeight: '500',
+  },
+  importeAfiliado: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#28a745',
     marginBottom: 10,
+  },
+  botonAgregar: {
+    backgroundColor: '#2089dc',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   emptyContainer: {
     flex: 1,

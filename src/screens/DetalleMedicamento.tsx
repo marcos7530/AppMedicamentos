@@ -32,7 +32,7 @@ const DetalleMedicamento = ({ route }: Props) => {
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.label}>Categoría:</Text>
-          <Text style={styles.valor}>{medicamento.categoria}</Text>
+          <Text style={styles.valor}>{medicamento.alfabeta}</Text>
         </View>
       </Card>
     </ScrollView>

@@ -14,6 +14,10 @@ export const cargarMedicamentosDesdeExcel = async (archivo: ArrayBuffer): Promis
       precio: parseFloat(row.precio) || 0,
       laboratorio: row.laboratorio || '',
       presentacion: row.presentacion || '',
+      principioActivo: row.principioActivo || '',
+      cobertura: row.cobertura || '',
+      importeAfiliado: parseFloat(row.importeAfiliado) || 0,
+      alfabeta: row.alfabeta || '',
       categoria: row.categoria || '',
     }));
   } catch (error) {
@@ -31,7 +35,6 @@ export const validarFormatoExcel = (medicamentos: Medicamento[]): boolean => {
     typeof med.nombre === 'string' &&
     typeof med.precio === 'number' &&
     typeof med.laboratorio === 'string' &&
-    typeof med.presentacion === 'string' &&
-    typeof med.categoria === 'string'
+    typeof med.presentacion === 'string'
   );
 }; 
