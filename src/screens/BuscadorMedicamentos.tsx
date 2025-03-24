@@ -70,8 +70,14 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
   };
 
   const aplicarFiltros = () => {
+    // Si no hay texto de búsqueda, mostrar lista vacía
+    if (!filtros.busqueda.trim()) {
+      setMedicamentosFiltrados([]);
+      return;
+    }
+
     const resultados = medicamentos.filter(med => {
-      const textoBusqueda = filtros.busqueda.toLowerCase();
+      const textoBusqueda = filtros.busqueda.toLowerCase().trim();
       const cumpleBusqueda = filtros.modoBusqueda === 'nombre' 
         ? med.nombre.toLowerCase().includes(textoBusqueda)
         : med.principioActivo.toLowerCase().includes(textoBusqueda);
@@ -132,15 +138,36 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
     </Card>
   );
 
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Icon
+        name="search"
+        type="font-awesome"
+        size={50}
+        color="#ccc"
+      />
+      <Text style={styles.emptyText}>
+        {filtros.busqueda.trim() 
+          ? "No se encontraron medicamentos"
+          : "Escribe en el buscador para ver medicamentos"}
+      </Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <SearchBar
-          placeholder={`Buscar por ${filtros.modoBusqueda === 'nombre' ? 'nombre' : 'principio activo'}...`}
+          placeholder={`Buscar por ${filtros.modoBusqueda === 'nombre' ? 'nombre comercial' : 'principio activo'}...`}
           onChangeText={(texto: string) => setFiltros({ ...filtros, busqueda: texto })}
           value={filtros.busqueda}
           platform="default"
           containerStyle={styles.searchBar}
+          inputContainerStyle={{ backgroundColor: 'transparent' }}
+          inputStyle={{ color: '#333', fontSize: 16 }}
+          searchIcon={{ color: '#2089dc' }}
+          clearIcon={{ color: '#2089dc' }}
+          placeholderTextColor="#999"
         />
         <ButtonGroup
           buttons={['Nombre', 'Principio']}
@@ -159,14 +186,17 @@ const BuscadorMedicamentos = ({ navigation }: NavigationProps) => {
         buttonContainerStyle={styles.buttonContainer}
         innerBorderStyle={{ width: 0.5 }}
       />
-      <Text style={styles.resultados}>
-        Resultados encontrados: {medicamentosFiltrados.length}
-      </Text>
+      {medicamentosFiltrados.length > 0 && (
+        <Text style={styles.resultados}>
+          Resultados encontrados: {medicamentosFiltrados.length}
+        </Text>
+      )}
       <FlatList
         data={medicamentosFiltrados}
         renderItem={renderMedicamento}
         keyExtractor={(item, index) => `${item.alfabeta}-${item.nombre}-${index}`}
         style={styles.lista}
+        ListEmptyComponent={renderEmptyState}
       />
     </View>
   );
@@ -178,35 +208,56 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   searchBar: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 15,
+    borderBottomWidth: 0,
+    borderTopWidth: 0,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   searchModeGroup: {
-    width: 150,
+    marginHorizontal: 0,
     height: 40,
-    borderRadius: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2089dc',
+    backgroundColor: '#fff',
   },
   searchModeText: {
-    fontSize: 12,
+    fontSize: 14,
+    color: '#2089dc',
   },
   buttonGroup: {
-    marginHorizontal: 10,
-    marginBottom: 10,
+    marginHorizontal: 15,
+    marginVertical: 10,
     height: 40,
-    borderRadius: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2089dc',
+    backgroundColor: '#fff',
   },
   buttonGroupText: {
     fontSize: 12,
+    color: '#2089dc',
   },
   buttonContainer: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
   resultados: {
     textAlign: 'center',
@@ -234,13 +285,35 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   card: {
-    margin: 10,
+    marginBottom: 10,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardContent: {
+    padding: 15,
   },
   label: {
     fontWeight: 'bold',
   },
   value: {
     marginBottom: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 50,
+  },
+  emptyText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 30,
   },
 });
 

@@ -135,6 +135,12 @@ const styles = StyleSheet.create({
   card: {
     margin: 10,
     padding: 10,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -165,6 +171,7 @@ const styles = StyleSheet.create({
     padding: 5,
     margin: 5,
     backgroundColor: '#2089dc',
+    borderRadius: 8,
   },
   cantidad: {
     fontSize: 16,
@@ -173,6 +180,7 @@ const styles = StyleSheet.create({
   botonEliminar: {
     padding: 10,
     backgroundColor: '#dc3545',
+    borderRadius: 8,
   },
   subtotal: {
     textAlign: 'right',
@@ -188,6 +196,13 @@ const styles = StyleSheet.create({
     margin: 0,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   totalText: {
     fontSize: 20,
