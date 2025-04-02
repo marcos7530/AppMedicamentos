@@ -1,72 +1,76 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Card, Text } from '@rneui/themed';
-import { Medicamento } from '../types/types';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { Button } from '@rneui/themed';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useCarrito } from '../context/CarritoContext';
 
 type RootStackParamList = {
-  Buscador: undefined;
-  Detalle: { medicamento: Medicamento };
+  Home: undefined;
+  BuscadorMedicamentos: undefined;
+  Carrito: undefined;
+  DetalleMedicamento: { medicamento: any };
 };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Detalle'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'DetalleMedicamento'>;
 
-const DetalleMedicamento = ({ route }: Props) => {
+export default function DetalleMedicamento({ route, navigation }: Props) {
   const { medicamento } = route.params;
+  const { agregarAlCarrito } = useCarrito();
 
   return (
     <ScrollView style={styles.container}>
-      <Card containerStyle={styles.card}>
-        <Card.Title style={styles.titulo}>{medicamento.nombre}</Card.Title>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Precio:</Text>
-          <Text style={styles.valor}>${medicamento.precio}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Laboratorio:</Text>
-          <Text style={styles.valor}>{medicamento.laboratorio}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Presentación:</Text>
-          <Text style={styles.valor}>{medicamento.presentacion}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Categoría:</Text>
-          <Text style={styles.valor}>{medicamento.alfabeta}</Text>
-        </View>
-      </Card>
+      <View style={styles.content}>
+        <Text style={styles.title}>{medicamento.nombre}</Text>
+        <Text style={styles.subtitle}>Principio Activo: {medicamento.principio_activo}</Text>
+        <Text style={styles.subtitle}>Presentación: {medicamento.presentacion}</Text>
+        <Text style={styles.subtitle}>Cobertura: {medicamento.cobertura}%</Text>
+        <Text style={styles.price}>Precio: ${medicamento.precio}</Text>
+        <Text style={styles.alfabeta}>Categoría Alfabeta: {medicamento.alfabeta}</Text>
+        
+        <Button
+          title="Agregar al Carrito"
+          onPress={() => {
+            agregarAlCarrito(medicamento);
+            Alert.alert('Éxito', 'Medicamento agregado al carrito');
+          }}
+          containerStyle={styles.buttonContainer}
+        />
+      </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  card: {
-    borderRadius: 10,
-    padding: 15,
-    margin: 15,
+  content: {
+    padding: 20,
   },
-  titulo: {
+  title: {
     fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#2089dc',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#666',
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2089dc',
+    marginVertical: 10,
+  },
+  alfabeta: {
+    fontSize: 16,
+    color: '#666',
     marginBottom: 20,
   },
-  infoContainer: {
-    flexDirection: 'row',
-    marginBottom: 15,
-    alignItems: 'center',
+  buttonContainer: {
+    marginTop: 20,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    width: 120,
-  },
-  valor: {
-    fontSize: 16,
-    flex: 1,
-  },
-});
-
-export default DetalleMedicamento; 
+}); 
