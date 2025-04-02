@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button } from '@rneui/themed';
+import { Button, Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -22,11 +22,35 @@ export default function HomeScreen() {
         title="Buscar Medicamentos"
         onPress={() => navigation.navigate('BuscadorMedicamentos')}
         containerStyle={styles.buttonContainer}
+        buttonStyle={styles.button}
+        titleStyle={styles.buttonText}
+        icon={
+          <Icon
+            name="search"
+            type="font-awesome"
+            color="white"
+            size={24}
+            style={styles.buttonIcon}
+          />
+        }
+        iconPosition="left"
       />
       <Button
         title="Ver Carrito"
         onPress={() => navigation.navigate('Carrito')}
         containerStyle={styles.buttonContainer}
+        buttonStyle={styles.button}
+        titleStyle={styles.buttonText}
+        icon={
+          <Icon
+            name="shopping-cart"
+            type="font-awesome"
+            color="white"
+            size={24}
+            style={styles.buttonIcon}
+          />
+        }
+        iconPosition="left"
       />
     </View>
   );
@@ -40,6 +64,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   buttonContainer: {
-    marginVertical: 10,
+    marginVertical: 15,
+    width: '100%',
+  },
+  button: {
+    height: 60,
+    borderRadius: 10,
+    backgroundColor: '#2089dc',
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  buttonIcon: {
+    marginRight: 10,
   },
 }); 

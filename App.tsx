@@ -24,9 +24,8 @@ type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
+    // Verificar actualización en segundo plano
     const verificarActualizacion = async () => {
       try {
         const { message } = await medicamentosService.verificarActualizacion();
@@ -37,56 +36,53 @@ export default function App() {
           'Error',
           'No se pudo verificar la actualización del listado de medicamentos.'
         );
-      } finally {
-        setIsLoading(false);
       }
     };
 
+    // Iniciar la verificación sin esperar
     verificarActualizacion();
   }, []);
 
-  if (isLoading) {
-    return null; // O un componente de carga si lo prefieres
-  }
-
   return (
     <CarritoProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: '#2089dc',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        >
-          <Stack.Screen 
-            name="Home" 
-            component={HomeScreen} 
-            options={{ title: 'Inicio' }}
-          />
-          <Stack.Screen 
-            name="BuscadorMedicamentos" 
-            component={BuscadorMedicamentos} 
-            options={{ title: 'Buscador de Medicamentos' }}
-          />
-          <Stack.Screen 
-            name="Carrito" 
-            component={Carrito} 
-            options={{ title: 'Carrito de Compras' }}
-          />
-          <Stack.Screen 
-            name="DetalleMedicamento" 
-            component={DetalleMedicamento} 
-            options={{ title: 'Detalle del Medicamento' }}
-          />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Home"
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#2089dc',
+              },
+              headerTintColor: '#fff',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+            }}
+          >
+            <Stack.Screen 
+              name="Home" 
+              component={HomeScreen} 
+              options={{ title: 'Inicio' }}
+            />
+            <Stack.Screen 
+              name="BuscadorMedicamentos" 
+              component={BuscadorMedicamentos} 
+              options={{ title: 'Buscador de Medicamentos' }}
+            />
+            <Stack.Screen 
+              name="Carrito" 
+              component={Carrito} 
+              options={{ title: 'Carrito de Compras' }}
+            />
+            <Stack.Screen 
+              name="DetalleMedicamento" 
+              component={DetalleMedicamento} 
+              options={{ title: 'Detalle del Medicamento' }}
+            />
+          </Stack.Navigator>
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </SafeAreaProvider>
     </CarritoProvider>
   );
 }

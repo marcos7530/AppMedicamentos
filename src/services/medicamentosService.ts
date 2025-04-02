@@ -3,6 +3,9 @@ import * as XLSX from 'xlsx';
 
 const DATOS_GOV_URL = 'https://datos.gob.ar/dataset/pami-listado-precios-medicamentos-para-entidades/archivo/pami_e72a9026-a971-46c1-b828-2638b2b2be37';
 
+// Cache en memoria
+let medicamentosCache: any[] | null = null;
+
 export const medicamentosService = {
   async descargarArchivoXLSX() {
     try {
@@ -53,6 +56,11 @@ export const medicamentosService = {
 
   async leerArchivoXLSX() {
     try {
+      // Si tenemos datos en caché, los devolvemos
+      if (medicamentosCache) {
+        return medicamentosCache;
+      }
+
       const fileUri = `${FileSystem.documentDirectory}medicamentos/medicamentos.xlsx`;
       const fileContent = await FileSystem.readAsStringAsync(fileUri, {
         encoding: FileSystem.EncodingType.Base64
@@ -63,6 +71,8 @@ export const medicamentosService = {
       const worksheet = workbook.Sheets[firstSheetName];
       const data = XLSX.utils.sheet_to_json(worksheet);
 
+      // Guardar en caché
+      medicamentosCache = data;
       return data;
     } catch (error) {
       console.error('Error al leer el archivo:', error);
@@ -73,6 +83,12 @@ export const medicamentosService = {
   async verificarActualizacion() {
     try {
       const { isNewVersion, lastUpdate } = await this.descargarArchivoXLSX();
+      
+      // Si hay una nueva versión, limpiamos la caché
+      if (isNewVersion) {
+        medicamentosCache = null;
+      }
+
       return {
         isNewVersion,
         lastUpdate,
@@ -84,5 +100,10 @@ export const medicamentosService = {
       console.error('Error al verificar actualización:', error);
       throw error;
     }
+  },
+
+  // Método para limpiar la caché si es necesario
+  clearCache() {
+    medicamentosCache = null;
   }
 }; 
